@@ -1,0 +1,30 @@
+{% extends 'base.html' %} {% block header %}
+<h2>{% block title %}Products{% endblock %}</h2>
+{% endblock %} {% block content %}
+<a href="{{ url_for('booth.register') }}" role="button" id="register-button">
+  Register a new product
+</a>
+<table role="grid">
+  <thead>
+    <tr>
+      <th scope="col">Name</th>
+      <th scope="col">Description</th>
+      <th scope="col" colspan="2"></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for product in products %}
+    <tr>
+      <th scope="row">{{ product['name'] }}</th>
+      <td>{{ product['description'] }}</td>
+      <td class="col-shrink">
+        <a href="{{ url_for('booth.edit', id=product['id']) }}"> Edit </a>
+      </td>
+      <td class="col-shrink">
+        <a href="{{ url_for('booth.delete', id=product['id']) }}"> Delete </a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

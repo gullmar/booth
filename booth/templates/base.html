@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<title>{% block title %}{% endblock %} - Booth</title>
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='pico.min.css') }}"
+/>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+<body>
+  <nav>
+    <span>
+      <h1>Booth - Applifting Python Assessment</h1>
+    </span>
+  </nav>
+  <main class="container">
+    <header>{% block header %}{% endblock %}</header>
+    <div class="content">
+      {% for message in get_flashed_messages() %}
+      <mark>{{ message }}</mark>
+      {% endfor %}
+      {% if not is_index %}
+      <a href="{{ url_for('booth.index') }}">⟵ back</a>
+      {% endif %}
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+</body>
