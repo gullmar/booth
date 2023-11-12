@@ -60,9 +60,9 @@ def register_product(name, description):
             (id, name, description),
         )
         db.commit()
-    except sqlite3.IntegrityError as e:
-        error = f'Name "{name}" is already used by another product'
-    except Exception as e:
+    except sqlite3.IntegrityError:
+        error = f'Name "{name}" is already used by another product.'
+    except Exception:
         error = GENERIC_ERROR_MESSAGE
 
     return error
@@ -118,8 +118,8 @@ def update_product(id, name, description):
         )
         db.commit()
     except sqlite3.IntegrityError as e:
-        error = f'Name "{name}" is already used by another product'
-    except Exception as e:
+        error = f'Name "{name}" is already used by another product.'
+    except Exception:
         error = GENERIC_ERROR_MESSAGE
 
     return error

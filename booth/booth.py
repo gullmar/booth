@@ -54,15 +54,14 @@ def register():
 def edit(id):
     error, product = db.get_product(id)
 
-    if error:
-        flash(error)
-    if product is None:
+    if error or not product:
+        if error:
+            flash(error)
         return redirect(url_for("booth.index"))
 
     if not error and request.method == "POST":
         name = request.form["name"]
         description = request.form["description"]
-        error = None
 
         if not name:
             error = "Name is required."
