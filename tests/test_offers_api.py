@@ -7,6 +7,9 @@ import json
 from booth.offers_api import fetch_access_token, get_offers, register_product
 
 
+TEST_URL = "http://testurl"
+
+
 @pytest.mark.parametrize(
     (
         "baseurl",
@@ -18,7 +21,7 @@ from booth.offers_api import fetch_access_token, get_offers, register_product
     ),
     (
         (
-            "https://testurl",
+            TEST_URL,
             "rtoken",
             201,
             json.dumps({"access_token": "test_token"}),
@@ -26,7 +29,7 @@ from booth.offers_api import fetch_access_token, get_offers, register_product
             "test_token",
         ),
         (
-            "https://testurl",
+            TEST_URL,
             "rtoken",
             401,
             "Bad authentication",
@@ -68,7 +71,7 @@ def test_fetch_access_token(
     ),
     (
         (
-            "https://testurl",
+            TEST_URL,
             "test_token",
             "test_id",
             "test_name",
@@ -78,7 +81,7 @@ def test_fetch_access_token(
             None,
         ),
         (
-            "https://testurl",
+            TEST_URL,
             "test_token",
             "test_id",
             "test_name",
@@ -122,7 +125,7 @@ def test_register_product(
     ),
     (
         (
-            "https://testurl",
+            TEST_URL,
             "test_token",
             "test_id",
             200,
@@ -131,7 +134,7 @@ def test_register_product(
             [{"id": "test_id", "price": 100, "items_in_stock": 10}]
         ),
         (
-            "https://testurl",
+            TEST_URL,
             "test_token",
             "test_id",
             401,
