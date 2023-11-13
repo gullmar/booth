@@ -9,6 +9,10 @@ with open(os.path.join(os.path.dirname(__file__), "data.sql"), "rb") as f:
     _data_sql = f.read().decode("utf-8")
 
 
+TEST_BASEURL = "http://testurl"
+TEST_REFRESH_TOKEN = "test-refresh-token"
+
+
 @pytest.fixture
 def app():
     db_fd, db_path = tempfile.mkstemp()
@@ -17,7 +21,8 @@ def app():
         {
             "TESTING": True,
             "DATABASE": db_path,
-            "OFFERS_BASEURL": "http://testurl"
+            "OFFERS_BASEURL": TEST_BASEURL,
+            "OFFERS_REFRESH_TOKEN": TEST_REFRESH_TOKEN
         }
     )
 

@@ -1,20 +1,18 @@
-from booth.constants import GENERIC_ERROR_MESSAGE
 import pytest
 import requests_mock
 
 from urllib.parse import urljoin
 import json
 
-from booth.offers_api import BAD_OFFERS_AUTHENTICATION_ERROR_MESSAGE, fetch_access_token, get_offers, register_product
+from booth import offers_api, constants
+from tests import conftest
 
 
-TEST_URL = "http://testurl"
+TEST_ACCESS_TOKEN = 'test-access-token'
 
 
 @pytest.mark.parametrize(
     (
-        "baseurl",
-        "refresh_token",
         "response_status",
         "response_text",
         "expected_error",
@@ -22,34 +20,26 @@ TEST_URL = "http://testurl"
     ),
     (
         (
-            TEST_URL,
-            "rtoken",
             201,
             json.dumps({"access_token": "test_token"}),
             None,
             "test_token",
         ),
         (
-            TEST_URL,
-            "rtoken",
             401,
             "Bad authentication",
-            BAD_OFFERS_AUTHENTICATION_ERROR_MESSAGE,
+            offers_api.BAD_OFFERS_AUTHENTICATION_ERROR_MESSAGE,
             None,
         ),
         (
-            TEST_URL,
-            "rtoken",
             500,
             "Server error",
-            GENERIC_ERROR_MESSAGE,
+            constants.GENERIC_ERROR_MESSAGE,
             None,
         ),
     ),
 )
 def test_fetch_access_token(
-    baseurl,
-    refresh_token,
     response_status,
     response_text,
     expected_error,
@@ -57,20 +47,18 @@ def test_fetch_access_token(
 ):
     with requests_mock.Mocker() as m:
         m.post(
-            urljoin(baseurl, "/api/v1/auth"),
-            request_headers={"Bearer": refresh_token},
+            urljoin(conftest.TEST_BASEURL, "/api/v1/auth"),
+            request_headers={"Bearer": conftest.TEST_REFRESH_TOKEN},
             status_code=response_status,
             text=response_text,
         )
-        error, access_token = fetch_access_token(baseurl, refresh_token)
+        error, access_token = offers_api.fetch_access_token(conftest.TEST_BASEURL, conftest.TEST_REFRESH_TOKEN)
     assert error == expected_error
     assert access_token == expected_token
 
 
 @pytest.mark.parametrize(
     (
-        "baseurl",
-        "access_token",
         "product_id",
         "name",
         "description",
@@ -80,8 +68,6 @@ def test_fetch_access_token(
     ),
     (
         (
-            TEST_URL,
-            "test_token",
             "test_id",
             "test_name",
             "test_description",
@@ -90,30 +76,24 @@ def test_fetch_access_token(
             None,
         ),
         (
-            TEST_URL,
-            "test_token",
             "test_id",
             "test_name",
             "test_description",
             401,
             "Bad authentication",
-            BAD_OFFERS_AUTHENTICATION_ERROR_MESSAGE,
+            offers_api.BAD_OFFERS_AUTHENTICATION_ERROR_MESSAGE,
         ),
         (
-            TEST_URL,
-            "test_token",
             "test_id",
             "test_name",
             "test_description",
             500,
             "Server error",
-            GENERIC_ERROR_MESSAGE,
+            constants.GENERIC_ERROR_MESSAGE,
         ),
     ),
 )
 def test_register_product(
-    baseurl,
-    access_token,
     product_id,
     name,
     description,
@@ -123,19 +103,17 @@ def test_register_product(
 ):
     with requests_mock.Mocker() as m:
         m.post(
-            urljoin(baseurl, "/api/v1/products/register"),
-            request_headers={"Bearer": access_token},
+            urljoin(conftest.TEST_BASEURL, "/api/v1/products/register"),
+            request_headers={"Bearer": TEST_ACCESS_TOKEN},
             status_code=response_status,
             text=response_text,
         )
-        error = register_product(baseurl, access_token, product_id, name, description)
+        error = offers_api.register_product(conftest.TEST_BASEURL, TEST_ACCESS_TOKEN, product_id, name, description)
     assert error == expected_error
 
 
 @pytest.mark.parametrize(
     (
-        "baseurl",
-        "access_token",
         "product_id",
         "response_status",
         "response_text",
@@ -144,8 +122,6 @@ def test_register_product(
     ),
     (
         (
-            TEST_URL,
-            "test_token",
             "test_id",
             200,
             json.dumps([{"id": "test_id", "price": 100, "items_in_stock": 10}]),
@@ -153,28 +129,22 @@ def test_register_product(
             [{"id": "test_id", "price": 100, "items_in_stock": 10}]
         ),
         (
-            TEST_URL,
-            "test_token",
             "test_id",
             401,
             "Bad authentication",
-            BAD_OFFERS_AUTHENTICATION_ERROR_MESSAGE,
+            offers_api.BAD_OFFERS_AUTHENTICATION_ERROR_MESSAGE,
             None
         ),
         (
-            TEST_URL,
-            "test_token",
             "test_id",
             500,
             "Server error",
-            GENERIC_ERROR_MESSAGE,
+            constants.GENERIC_ERROR_MESSAGE,
             None
         ),
     ),
 )
 def test_get_offers(
-    baseurl,
-    access_token,
     product_id,
     response_status,
     response_text,
@@ -183,11 +153,11 @@ def test_get_offers(
 ):
     with requests_mock.Mocker() as m:
         m.get(
-            urljoin(baseurl, f"/api/v1/products/{product_id}/offers"),
-            request_headers={"Bearer": access_token},
+            urljoin(conftest.TEST_BASEURL, f"/api/v1/products/{product_id}/offers"),
+            request_headers={"Bearer": TEST_ACCESS_TOKEN},
             status_code=response_status,
             text=response_text,
         )
-        error, offers = get_offers(baseurl, access_token, product_id)
+        error, offers = offers_api.get_offers(conftest.TEST_BASEURL, TEST_ACCESS_TOKEN, product_id)
     assert error == expected_error
     assert offers == expected_offers
