@@ -3,7 +3,16 @@ from flask import current_app
 from booth import offers_api
 
 
+# FIXME: this mechanism is not easily scalable and requires a specific
+# implementation in each function calling the offers API.
+# A more sophisticated solution relying on the JWT expiration could be preferred.
 def evaluate_and_renovate_token(error) -> tuple[str | None, bool]:
+    """
+    Checks if the obtained error is a "bad authentication" error;
+    if that is the case, renovate the access token using the refresh token.
+
+    :param error: the error obtained calling the offers API
+    """
     if error != offers_api.BAD_OFFERS_AUTHENTICATION_ERROR_MESSAGE:
         return error, False
     baseurl = current_app.config["OFFERS_BASEURL"]

@@ -8,9 +8,6 @@ from booth import offers_api, constants
 from tests import conftest
 
 
-TEST_ACCESS_TOKEN = 'test-access-token'
-
-
 @pytest.mark.parametrize(
     (
         "response_status",
@@ -104,11 +101,11 @@ def test_register_product(
     with requests_mock.Mocker() as m:
         m.post(
             urljoin(conftest.TEST_BASEURL, "/api/v1/products/register"),
-            request_headers={"Bearer": TEST_ACCESS_TOKEN},
+            request_headers={"Bearer": conftest.TEST_ACCESS_TOKEN},
             status_code=response_status,
             text=response_text,
         )
-        error = offers_api.register_product(conftest.TEST_BASEURL, TEST_ACCESS_TOKEN, product_id, name, description)
+        error = offers_api.register_product(conftest.TEST_BASEURL, conftest.TEST_ACCESS_TOKEN, product_id, name, description)
     assert error == expected_error
 
 
@@ -154,10 +151,10 @@ def test_get_offers(
     with requests_mock.Mocker() as m:
         m.get(
             urljoin(conftest.TEST_BASEURL, f"/api/v1/products/{product_id}/offers"),
-            request_headers={"Bearer": TEST_ACCESS_TOKEN},
+            request_headers={"Bearer": conftest.TEST_ACCESS_TOKEN},
             status_code=response_status,
             text=response_text,
         )
-        error, offers = offers_api.get_offers(conftest.TEST_BASEURL, TEST_ACCESS_TOKEN, product_id)
+        error, offers = offers_api.get_offers(conftest.TEST_BASEURL, conftest.TEST_ACCESS_TOKEN, product_id)
     assert error == expected_error
     assert offers == expected_offers

@@ -1,6 +1,9 @@
+from urllib.parse import urljoin
+import requests_mock
 import pytest
 
 from booth.db import get_db
+from tests import conftest
 
 
 EMPTY_PRODUCT = {"id": "", "name": "", "description": ""}
@@ -24,24 +27,30 @@ def test_index(client, monkeypatch):
 
 
 def test_register(client, app, monkeypatch):
-    assert client.get("/register").status_code == 200
-    client.post("/register", data={"name": "Apple", "description": "A fruit."})
+    with requests_mock.Mocker() as m:
+        m.post(
+            urljoin(conftest.TEST_BASEURL, "/api/v1/products/register"),
+            request_headers={"Bearer": conftest.TEST_ACCESS_TOKEN},
+            status_code=201,
+        )
+        assert client.get("/register").status_code == 200
+        client.post("/register", data={"name": "Apple", "description": "A fruit."})
 
-    with app.app_context():
-        db = get_db()
-        count = db.execute("SELECT COUNT(id) FROM products").fetchone()[0]
-        assert count == 3
+        with app.app_context():
+            db = get_db()
+            count = db.execute("SELECT COUNT(id) FROM products").fetchone()[0]
+            assert count == 3
 
-    response = client.post(
-        "/register", data={"name": "Onion", "description": "A vegetable?"}
-    )
-    assert b"Name &#34;Onion&#34; is already used by another product." in response.data
+        response = client.post(
+            "/register", data={"name": "Onion", "description": "A vegetable?"}
+        )
+        assert b"Name &#34;Onion&#34; is already used by another product." in response.data
 
-    monkeypatch.setattr("booth.db.get_db", get_failing_db)
-    response = client.post(
-        "/register", data={"name": "Pear", "description": "Another fruit."}
-    )
-    assert b"Something went wrong" in response.data
+        monkeypatch.setattr("booth.db.get_db", get_failing_db)
+        response = client.post(
+            "/register", data={"name": "Pear", "description": "Another fruit."}
+        )
+        assert b"Something went wrong" in response.data
 
 
 def test_edit(client, app, monkeypatch):

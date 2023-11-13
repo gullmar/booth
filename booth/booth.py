@@ -8,7 +8,7 @@ from flask import (
     url_for,
 )
 
-from booth import db
+from booth import db, offers
 
 
 bp = Blueprint("booth", __name__)
@@ -26,7 +26,7 @@ def index():
 
 @bp.route("/register", methods=("GET", "POST"))
 def register():
-    error = None
+    error: str | None = None
 
     if request.method == "POST":
         product_id = None
@@ -40,6 +40,9 @@ def register():
 
         if not error:
             error, product_id = db.register_product(name, description)
+
+        if product_id and not error:
+            error = offers.register_product(product_id, name, description)
 
         if not error:
             flash(f"Product correctly registered!")
