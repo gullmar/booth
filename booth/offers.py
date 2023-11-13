@@ -1,3 +1,5 @@
+import json
+import os
 from flask import current_app
 
 from booth import offers_api
@@ -19,6 +21,9 @@ def evaluate_and_renovate_token(error) -> tuple[str | None, bool]:
     refresh_token = current_app.config["OFFERS_REFRESH_TOKEN"]
     error, access_token = offers_api.fetch_access_token(baseurl, refresh_token)
     if access_token and not error:
+        token_file = os.path.join(current_app.instance_path, 'offers_access_token.json')
+        with open(token_file, 'w') as f:
+            json.dump({"OFFERS_ACCESS_TOKEN": access_token}, f)
         current_app.config.update(OFFERS_ACCESS_TOKEN=access_token)
         return error, True
     return error, False

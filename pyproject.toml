@@ -4,14 +4,15 @@ version = "0.0.1"
 description = "A REST API Python microservice which allows users to browse a product catalogue and which automatically updates prices from the offer service."
 dependencies = [
 	"flask",
+  "Flask-APScheduler",
 	"requests",
 ]
 
 [project.optional-dependencies]
 tests = [
-  'coverage',
-  'pytest',
-  'requests-mock',
+  "coverage",
+  "pytest",
+  "requests-mock",
 ]
 
 [build-system]

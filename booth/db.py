@@ -61,7 +61,8 @@ def register_product(name, description):
         db.commit()
     except sqlite3.IntegrityError:
         error = f'Name "{name}" is already used by another product.'
-    except Exception:
+    except Exception as e:
+        current_app.logger.error(e)
         error = constants.GENERIC_ERROR_MESSAGE
 
     if error:
@@ -82,7 +83,8 @@ def get_all_products():
 
         if products is None:
             error = "Error retrieving products."
-    except Exception:
+    except Exception as e:
+        current_app.logger.error(e)
         error = constants.GENERIC_ERROR_MESSAGE
 
     return error, products
@@ -103,7 +105,8 @@ def get_product(id):
 
         if product is None:
             error = f"Product id {id} does not exist"
-    except Exception:
+    except Exception as e:
+        current_app.logger.error(e)
         error = constants.GENERIC_ERROR_MESSAGE
 
     return error, product
@@ -121,7 +124,8 @@ def update_product(id, name, description):
         db.commit()
     except sqlite3.IntegrityError as e:
         error = f'Name "{name}" is already used by another product.'
-    except Exception:
+    except Exception as e:
+        current_app.logger.error(e)
         error = constants.GENERIC_ERROR_MESSAGE
 
     return error
@@ -134,7 +138,67 @@ def delete_product(id):
         db = get_db()
         db.execute("DELETE FROM products WHERE id = ?", (id,))
         db.commit()
-    except Exception:
+    except Exception as e:
+        current_app.logger.error(e)
+        error = constants.GENERIC_ERROR_MESSAGE
+
+    return error
+
+
+def get_product_offers(product_id):
+    error, product_offers = None, None
+
+    try:
+        product_offers = (
+            get_db()
+            .execute(
+                "SELECT id, product_id, price, items_in_stock FROM offers WHERE product_id = ?",
+                (product_id,),
+            )
+            .fetchall()
+        )
+
+        if product_offers is None:
+            error = "Error retrieving product offers"
+    except Exception as e:
+        current_app.logger.error(e)
+        error = constants.GENERIC_ERROR_MESSAGE
+
+    return error, product_offers
+
+
+def add_offer(id, product_id, price, items_in_stock):
+    error = None
+
+    try:
+        db = get_db()
+        db.execute(
+            "INSERT INTO offers (id, product_id, price, items_in_stock) VALUES (?, ?, ?, ?)",
+            (id, product_id, price, items_in_stock),
+        )
+        db.commit()
+    except Exception as e:
+        current_app.logger.error(e)
+        error = constants.GENERIC_ERROR_MESSAGE
+
+    if error:
+        product_id = None
+
+    return error
+
+
+def update_offer(id, product_id, price, items_in_stock):
+    error = None
+
+    try:
+        db = get_db()
+        db.execute(
+            "UPDATE offers SET product_id = ?, price = ?, items_in_stock = ? WHERE id = ?",
+            (product_id, price, items_in_stock, id),
+        )
+        db.commit()
+    except Exception as e:
+        current_app.logger.error(e)
         error = constants.GENERIC_ERROR_MESSAGE
 
     return error

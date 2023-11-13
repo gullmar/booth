@@ -8,7 +8,7 @@ CREATE TABLE products (
 );
 
 CREATE TABLE offers (
-	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	id TEXT PRIMARY KEY,
 	product_id TEXT NON NULL,
 	price INTEGER NOT NULL,
 	items_in_stock INTEGER NOT NULL,

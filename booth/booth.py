@@ -44,7 +44,20 @@ def register():
         if product_id and not error:
             error = offers.register_product(product_id, name, description)
 
+        if error and product_id:
+            db.delete_product(product_id)
+
         if not error:
+            if product_id:
+                error, product_offers = offers.get_offers(product_id)
+                if not error and product_offers:
+                    for offer in product_offers:
+                        db.add_offer(
+                            offer["id"],
+                            product_id,
+                            offer["price"],
+                            offer["items_in_stock"],
+                        )
             flash(f"Product correctly registered!")
             return redirect(url_for("booth.index"))
 

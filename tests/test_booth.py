@@ -1,3 +1,4 @@
+import re
 from urllib.parse import urljoin
 import requests_mock
 import pytest
@@ -28,11 +29,21 @@ def test_index(client, monkeypatch):
 
 def test_register(client, app, monkeypatch):
     with requests_mock.Mocker() as m:
+        monkeypatch.setattr("uuid.uuid4", lambda: "test-uuid")
+
         m.post(
             urljoin(conftest.TEST_BASEURL, "/api/v1/products/register"),
             request_headers={"Bearer": conftest.TEST_ACCESS_TOKEN},
             status_code=201,
         )
+        matcher = re.compile("/api/v1/products/.+/offers")
+        m.get(
+            matcher,
+            request_headers={"Bearer": conftest.TEST_ACCESS_TOKEN},
+            status_code=200,
+            text="[]"
+        )
+
         assert client.get("/register").status_code == 200
         client.post("/register", data={"name": "Apple", "description": "A fruit."})
 
@@ -44,7 +55,9 @@ def test_register(client, app, monkeypatch):
         response = client.post(
             "/register", data={"name": "Onion", "description": "A vegetable?"}
         )
-        assert b"Name &#34;Onion&#34; is already used by another product." in response.data
+        assert (
+            b"Name &#34;Onion&#34; is already used by another product." in response.data
+        )
 
         monkeypatch.setattr("booth.db.get_db", get_failing_db)
         response = client.post(
