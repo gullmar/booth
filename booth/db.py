@@ -4,8 +4,7 @@ from uuid import uuid4
 import click
 from flask import current_app, g
 
-
-GENERIC_ERROR_MESSAGE = "Something went wrong."
+from booth import constants
 
 
 def get_db():
@@ -51,21 +50,24 @@ def init_app(app):
 
 def register_product(name, description):
     error = None
-    id = str(uuid4())
+    product_id = str(uuid4())
 
     try:
         db = get_db()
         db.execute(
             "INSERT INTO products (id, name, description) VALUES (?, ?, ?)",
-            (id, name, description),
+            (product_id, name, description),
         )
         db.commit()
     except sqlite3.IntegrityError:
         error = f'Name "{name}" is already used by another product.'
     except Exception:
-        error = GENERIC_ERROR_MESSAGE
+        error = constants.GENERIC_ERROR_MESSAGE
 
-    return error
+    if error:
+        product_id = None
+
+    return error, product_id
 
 
 def get_all_products():
@@ -81,7 +83,7 @@ def get_all_products():
         if products is None:
             error = "Error retrieving products."
     except Exception:
-        error = GENERIC_ERROR_MESSAGE
+        error = constants.GENERIC_ERROR_MESSAGE
 
     return error, products
 
@@ -102,7 +104,7 @@ def get_product(id):
         if product is None:
             error = f"Product id {id} does not exist"
     except Exception:
-        error = GENERIC_ERROR_MESSAGE
+        error = constants.GENERIC_ERROR_MESSAGE
 
     return error, product
 
@@ -120,7 +122,7 @@ def update_product(id, name, description):
     except sqlite3.IntegrityError as e:
         error = f'Name "{name}" is already used by another product.'
     except Exception:
-        error = GENERIC_ERROR_MESSAGE
+        error = constants.GENERIC_ERROR_MESSAGE
 
     return error
 
@@ -133,6 +135,6 @@ def delete_product(id):
         db.execute("DELETE FROM products WHERE id = ?", (id,))
         db.commit()
     except Exception:
-        error = GENERIC_ERROR_MESSAGE
+        error = constants.GENERIC_ERROR_MESSAGE
 
     return error

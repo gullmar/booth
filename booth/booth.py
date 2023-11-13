@@ -29,6 +29,7 @@ def register():
     error = None
 
     if request.method == "POST":
+        product_id = None
         name = request.form["name"]
         description = request.form["description"]
 
@@ -38,7 +39,7 @@ def register():
             error = "Description is required."
 
         if not error:
-            error = db.register_product(name, description)
+            error, product_id = db.register_product(name, description)
 
         if not error:
             flash(f"Product correctly registered!")
@@ -50,9 +51,9 @@ def register():
     return render_template("booth/register.html")
 
 
-@bp.route("/edit/<id>", methods=("GET", "POST"))
-def edit(id):
-    error, product = db.get_product(id)
+@bp.route("/edit/<product_id>", methods=("GET", "POST"))
+def edit(product_id):
+    error, product = db.get_product(product_id)
 
     if error or not product:
         if error:
@@ -69,7 +70,7 @@ def edit(id):
             error = "Description is required."
 
         if not error:
-            error = db.update_product(id, name, description)
+            error = db.update_product(product_id, name, description)
 
         if not error:
             flash(f"Product correctly edited!")
@@ -81,10 +82,10 @@ def edit(id):
     return render_template("booth/edit.html", product=product)
 
 
-@bp.route("/delete/<id>", methods=("GET", "POST"))
-def delete(id):
+@bp.route("/delete/<product_id>", methods=("GET", "POST"))
+def delete(product_id):
     if request.method == "POST":
-        error = db.delete_product(id)
+        error = db.delete_product(product_id)
 
         if not error:
             flash(f"Product correctly deleted!")
@@ -92,7 +93,7 @@ def delete(id):
 
         flash(error)
 
-    error, product = db.get_product(id)
+    error, product = db.get_product(product_id)
 
     if error:
         flash(error)
