@@ -1,0 +1,20 @@
+{% extends 'base.html' %} {% block header %}
+<h2>{% block title %}Offers for product: {{ product['name'] }}{% endblock %}</h2>
+{% endblock %} {% block content %}
+<table role="grid">
+  <thead>
+    <tr>
+      <th scope="col">Price</th>
+      <th scope="col">Items in stock</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for offer in offers %}
+    <tr>
+      <th scope="row">{{ offer['price'] }}</th>
+      <td>{{ offer['items_in_stock'] }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

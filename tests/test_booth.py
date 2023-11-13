@@ -67,9 +67,9 @@ def test_register(client, app, monkeypatch):
 
 
 def test_edit(client, app, monkeypatch):
-    assert client.get("/edit/a").status_code == 200
+    assert client.get("/a/edit").status_code == 200
     response = client.post(
-        "/edit/a",
+        "/a/edit",
         data={"name": "Onion", "description": "A layered vegetable."},
     )
     assert response.headers["Location"] == "/"
@@ -82,7 +82,7 @@ def test_edit(client, app, monkeypatch):
         assert product["description"] == "A layered vegetable."
 
     response = client.post(
-        "/edit/a",
+        "/a/edit",
         data={"name": "Carrot", "description": "A layered vegetable."},
     )
     assert b"Name &#34;Carrot&#34; is already used by another product." in response.data
@@ -90,14 +90,14 @@ def test_edit(client, app, monkeypatch):
     monkeypatch.setattr("booth.db.get_db", get_failing_db)
     monkeypatch.setattr("booth.db.get_product", lambda _: (None, EMPTY_PRODUCT))
     response = client.post(
-        "/edit/a",
+        "/a/edit",
         data={"name": "Onion", "description": "A layered vegetable."},
     )
     assert b"Something went wrong" in response.data
 
 
 def test_delete(client, app, monkeypatch):
-    response = client.post("/delete/a")
+    response = client.post("/a/delete")
     assert response.headers["Location"] == "/"
 
     with app.app_context():
@@ -109,7 +109,7 @@ def test_delete(client, app, monkeypatch):
 
     monkeypatch.setattr("booth.db.get_db", get_failing_db)
     monkeypatch.setattr("booth.db.get_product", lambda _: (None, EMPTY_PRODUCT))
-    response = client.post("/delete/a")
+    response = client.post("/a/delete")
     assert b"Something went wrong" in response.data
 
 
@@ -117,7 +117,7 @@ def test_delete(client, app, monkeypatch):
     "path",
     (
         "/register",
-        "/edit/b",
+        "/b/edit",
     ),
 )
 def test_product_form_validation(client, path):
@@ -126,3 +126,9 @@ def test_product_form_validation(client, path):
 
     response = client.post(path, data={"name": "Some name", "description": ""})
     assert b"Description is required." in response.data
+
+
+def test_product_offers(client):
+    response = client.get("/a/offers")
+    assert response.status_code == 200
+    assert b'100' in response.data

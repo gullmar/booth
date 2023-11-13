@@ -9,7 +9,7 @@
     <tr>
       <th scope="col">Name</th>
       <th scope="col">Description</th>
-      <th scope="col" colspan="2"></th>
+      <th scope="col" colspan="3"></th>
     </tr>
   </thead>
   <tbody>
@@ -18,10 +18,19 @@
       <th scope="row">{{ product['name'] }}</th>
       <td>{{ product['description'] }}</td>
       <td class="col-shrink">
-        <a href="{{ url_for('booth.edit', product_id=product['id']) }}"> Edit </a>
+        <a href="{{ url_for('booth.offers', product_id=product['id']) }}">
+          Offers</a
+        >
       </td>
       <td class="col-shrink">
-        <a href="{{ url_for('booth.delete', product_id=product['id']) }}"> Delete </a>
+        <a href="{{ url_for('booth.edit', product_id=product['id']) }}">
+          Edit
+        </a>
+      </td>
+      <td class="col-shrink">
+        <a href="{{ url_for('booth.delete', product_id=product['id']) }}">
+          Delete
+        </a>
       </td>
     </tr>
     {% endfor %}

@@ -8,7 +8,7 @@ from flask import (
     url_for,
 )
 
-from booth import db, offers
+from booth import db, offers as booth_offers
 
 
 bp = Blueprint("booth", __name__)
@@ -42,14 +42,14 @@ def register():
             error, product_id = db.register_product(name, description)
 
         if product_id and not error:
-            error = offers.register_product(product_id, name, description)
+            error = booth_offers.register_product(product_id, name, description)
 
         if error and product_id:
             db.delete_product(product_id)
 
         if not error:
             if product_id:
-                error, product_offers = offers.get_offers(product_id)
+                error, product_offers = booth_offers.get_offers(product_id)
                 if not error and product_offers:
                     for offer in product_offers:
                         db.add_offer(
@@ -117,3 +117,19 @@ def delete(product_id):
         return redirect(url_for("booth.index"))
 
     return render_template("booth/delete.html", product=product)
+
+
+@bp.route("/<product_id>/offers")
+def offers(product_id):
+    error, product = db.get_product(product_id)
+
+    product_offers = None
+    if not error:
+        error, product_offers = db.get_product_offers(product_id)
+
+    if error:
+        flash(error)
+    if not product or not product_offers:
+        return redirect(url_for("booth.index"))
+
+    return render_template("booth/offers.html", product=product, offers=product_offers)
