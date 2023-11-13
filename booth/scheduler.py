@@ -7,6 +7,13 @@ from booth import db, offers
 app_scheduler = APScheduler()
 
 
+def find_offer(offers_list, id):
+    for offer in offers_list:
+        if offer["id"] == id:
+            return offer
+    return None
+
+
 def sync_offers(local_scheduler: APScheduler | None = None):
     scheduler = local_scheduler or app_scheduler
     if not scheduler.app:
@@ -15,9 +22,7 @@ def sync_offers(local_scheduler: APScheduler | None = None):
         scheduler.app.logger.info("Syncing offers...")
         error, products = db.get_all_products()
         if products == []:
-            scheduler.app.logger.info(
-                "No products to sync."
-            )
+            scheduler.app.logger.info("No products to sync.")
             return
         if error or not products:
             scheduler.app.logger.info(
@@ -38,14 +43,19 @@ def sync_offers(local_scheduler: APScheduler | None = None):
                 )
                 return
             for current_offer in current_offers:
-                if not any([offer["id"] == current_offer["id"] for offer in updated_offers]):
+                if not any(
+                    [offer["id"] == current_offer["id"] for offer in updated_offers]
+                ):
                     db.delete_offer(current_offer["id"])
             for updated_offer in updated_offers:
                 updated_offer["product_id"] = product["id"]
                 existing_offer = next(
-                    offer
-                    for offer in current_offers
-                    if offer["id"] == updated_offer["id"]
+                    (
+                        offer
+                        for offer in current_offers
+                        if offer["id"] == updated_offer["id"]
+                    ),
+                    None,
                 )
                 if not existing_offer:
                     error = db.add_offer(

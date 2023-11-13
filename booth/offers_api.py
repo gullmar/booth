@@ -14,7 +14,7 @@ def fetch_access_token(baseurl, refresh_token):
     headers = {"Bearer": refresh_token}
     r = requests.post(url, headers=headers)
     if current_app:
-        current_app.logger.info(f'POST {url}: {r.status_code}, {r.text}')
+        current_app.logger.info(f'POST {url}: {r.status_code}')
     error: str | None = None
     access_token: str | None = None
     match r.status_code:
@@ -34,7 +34,7 @@ def register_product(baseurl, access_token, product_id, name, description):
     request_data = {"id": product_id, "name": name, "description": description}
     r = requests.post(url, headers=headers, json=request_data)
     if current_app:
-        current_app.logger.info(f'POST {url} {r.request.body}: {r.status_code}, {r.text}')
+        current_app.logger.info(f'POST {url}: {r.status_code}, {r.text}')
     error = None
     match r.status_code:
         case 201:

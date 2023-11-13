@@ -67,7 +67,7 @@ def register():
     return render_template("booth/register.html")
 
 
-@bp.route("/edit/<product_id>", methods=("GET", "POST"))
+@bp.route("/<product_id>/edit", methods=("GET", "POST"))
 def edit(product_id):
     error, product = db.get_product(product_id)
 
@@ -98,7 +98,7 @@ def edit(product_id):
     return render_template("booth/edit.html", product=product)
 
 
-@bp.route("/delete/<product_id>", methods=("GET", "POST"))
+@bp.route("/<product_id>/delete", methods=("GET", "POST"))
 def delete(product_id):
     if request.method == "POST":
         error = db.delete_product(product_id)
