@@ -202,3 +202,17 @@ def update_offer(id, product_id, price, items_in_stock):
         error = constants.GENERIC_ERROR_MESSAGE
 
     return error
+
+
+def delete_offer(id):
+    error = None
+
+    try:
+        db = get_db()
+        db.execute("DELETE FROM offers WHERE id = ?", (id,))
+        db.commit()
+    except Exception as e:
+        current_app.logger.error(e)
+        error = constants.GENERIC_ERROR_MESSAGE
+
+    return error

@@ -1,12 +1,14 @@
+from flask import g
 from flask_apscheduler import APScheduler
 
 from booth import db, offers
 
 
-scheduler = APScheduler()
+app_scheduler = APScheduler()
 
 
-def sync_offers():
+def sync_offers(local_scheduler: APScheduler | None = None):
+    scheduler = local_scheduler or app_scheduler
     if not scheduler.app:
         return
     with scheduler.app.app_context():
@@ -35,6 +37,9 @@ def sync_offers():
                     "Offers sync aborted: cannot get product offers from db."
                 )
                 return
+            for current_offer in current_offers:
+                if not any([offer["id"] == current_offer["id"] for offer in updated_offers]):
+                    db.delete_offer(current_offer["id"])
             for updated_offer in updated_offers:
                 updated_offer["product_id"] = product["id"]
                 existing_offer = next(
@@ -79,6 +84,6 @@ def init_app(app):
             ]
         )
 
-        scheduler.init_app(app)
-        scheduler.start()
-        scheduler.run_job("sync_offers")
+        app_scheduler.init_app(app)
+        app_scheduler.start()
+        app_scheduler.run_job("sync_offers")

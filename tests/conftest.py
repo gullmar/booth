@@ -1,8 +1,9 @@
 import os
 import tempfile
+from flask_apscheduler import APScheduler
 
 import pytest
-from booth import create_app
+from booth import create_app, scheduler as booth_scheduler
 from booth.db import get_db, init_db
 
 with open(os.path.join(os.path.dirname(__file__), "data.sql"), "rb") as f:
@@ -46,3 +47,20 @@ def client(app):
 @pytest.fixture
 def runner(app):
     return app.test_cli_runner()
+
+@pytest.fixture
+def scheduler(app):
+    with app.app_context():
+        app.config.from_mapping(
+                JOBS=[
+                    {
+                        "id": "sync_offers",
+                        "func": booth_scheduler.sync_offers,
+                        "trigger": "interval",
+                        "seconds": 60,
+                    }
+                ]
+            )
+        scheduler = APScheduler()
+        scheduler.init_app(app)
+        return scheduler

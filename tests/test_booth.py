@@ -67,9 +67,9 @@ def test_register(client, app, monkeypatch):
 
 
 def test_edit(client, app, monkeypatch):
-    assert client.get("/edit/97170a30-6550-4684-ae1e-6b31f81f2511").status_code == 200
+    assert client.get("/edit/a").status_code == 200
     response = client.post(
-        "/edit/97170a30-6550-4684-ae1e-6b31f81f2511",
+        "/edit/a",
         data={"name": "Onion", "description": "A layered vegetable."},
     )
     assert response.headers["Location"] == "/"
@@ -77,12 +77,12 @@ def test_edit(client, app, monkeypatch):
     with app.app_context():
         db = get_db()
         product = db.execute(
-            "SELECT * FROM products WHERE id = '97170a30-6550-4684-ae1e-6b31f81f2511'"
+            "SELECT * FROM products WHERE id = 'a'"
         ).fetchone()
         assert product["description"] == "A layered vegetable."
 
     response = client.post(
-        "/edit/97170a30-6550-4684-ae1e-6b31f81f2511",
+        "/edit/a",
         data={"name": "Carrot", "description": "A layered vegetable."},
     )
     assert b"Name &#34;Carrot&#34; is already used by another product." in response.data
@@ -90,26 +90,26 @@ def test_edit(client, app, monkeypatch):
     monkeypatch.setattr("booth.db.get_db", get_failing_db)
     monkeypatch.setattr("booth.db.get_product", lambda _: (None, EMPTY_PRODUCT))
     response = client.post(
-        "/edit/97170a30-6550-4684-ae1e-6b31f81f2511",
+        "/edit/a",
         data={"name": "Onion", "description": "A layered vegetable."},
     )
     assert b"Something went wrong" in response.data
 
 
 def test_delete(client, app, monkeypatch):
-    response = client.post("/delete/97170a30-6550-4684-ae1e-6b31f81f2511")
+    response = client.post("/delete/a")
     assert response.headers["Location"] == "/"
 
     with app.app_context():
         db = get_db()
         product = db.execute(
-            'SELECT * FROM products WHERE id = "97170a30-6550-4684-ae1e-6b31f81f2511"'
+            'SELECT * FROM products WHERE id = "a"'
         ).fetchone()
         assert product is None
 
     monkeypatch.setattr("booth.db.get_db", get_failing_db)
     monkeypatch.setattr("booth.db.get_product", lambda _: (None, EMPTY_PRODUCT))
-    response = client.post("/delete/97170a30-6550-4684-ae1e-6b31f81f2511")
+    response = client.post("/delete/a")
     assert b"Something went wrong" in response.data
 
 
@@ -117,7 +117,7 @@ def test_delete(client, app, monkeypatch):
     "path",
     (
         "/register",
-        "/edit/1562d569-8eee-4555-b991-79b32576b5b0",
+        "/edit/b",
     ),
 )
 def test_product_form_validation(client, path):
