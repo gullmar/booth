@@ -15,6 +15,9 @@ def find_offer(offers_list, id):
 
 
 def sync_offers(local_scheduler: APScheduler | None = None):
+    """
+    :param local_scheduler: used for tests
+    """
     scheduler = local_scheduler or app_scheduler
     if not scheduler.app:
         return
@@ -42,6 +45,7 @@ def sync_offers(local_scheduler: APScheduler | None = None):
                     "Offers sync aborted: cannot get product offers from db."
                 )
                 return
+            # Remove offers that do not exist anymore
             for current_offer in current_offers:
                 if not any(
                     [offer["id"] == current_offer["id"] for offer in updated_offers]
@@ -57,6 +61,7 @@ def sync_offers(local_scheduler: APScheduler | None = None):
                     ),
                     None,
                 )
+                # Add new offers
                 if not existing_offer:
                     error = db.add_offer(
                         updated_offer["id"],
@@ -65,6 +70,7 @@ def sync_offers(local_scheduler: APScheduler | None = None):
                         updated_offer["items_in_stock"],
                     )
                     continue
+                # Update changed offers
                 if existing_offer != updated_offer:
                     db.update_offer(
                         updated_offer["id"],
