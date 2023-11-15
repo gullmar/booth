@@ -48,6 +48,27 @@ pip install waitress
 waitress-serve --call 'booth:create_app'
 ```
 
+### Run tests
+
+Install test dependencies:
+
+```
+pip install '.[test]'
+```
+
+Run tests:
+
+```
+python -m pytest
+```
+
+Check coverage:
+
+```
+python -m coverage run -m pytest
+python -m coverage report
+```
+
 ## Run with Docker Compose
 
 Environment variables can be customized in the `compose.yaml` file.
