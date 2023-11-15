@@ -1,6 +1,7 @@
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS products;
 DROP TABLE IF EXISTS offers;
+DROP TABLE IF EXISTS price_history;
 
 CREATE TABLE users (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -16,8 +17,16 @@ CREATE TABLE products (
 
 CREATE TABLE offers (
 	id TEXT PRIMARY KEY,
-	product_id TEXT NON NULL,
+	product_id TEXT NOT NULL,
 	price INTEGER NOT NULL,
 	items_in_stock INTEGER NOT NULL,
 	FOREIGN KEY (product_id) REFERENCES products (id)
 );
+
+CREATE TABLE price_history (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	timestamp INTEGER NOT NULL,
+	product_id TEXT NOT NULL,
+	mean_price INTEGER NOT NULL,
+	FOREIGN KEY (product_id) REFERENCES products (id)
+)

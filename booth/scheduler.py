@@ -1,5 +1,5 @@
-from flask import g
 from flask_apscheduler import APScheduler
+import time
 
 from booth import db, offers
 
@@ -78,6 +78,44 @@ def sync_offers(local_scheduler: APScheduler | None = None):
                         updated_offer["price"],
                         updated_offer["items_in_stock"],
                     )
+
+
+def update_price_history(local_scheduler: APScheduler | None = None):
+    """
+    :param local_scheduler: used for tests
+    """
+    scheduler = local_scheduler or app_scheduler
+    if not scheduler.app:
+        return
+    with scheduler.app.app_context():
+        scheduler.app.logger.info("Updating price history...")
+
+        now = int(time.time())
+
+        error, products = db.get_all_products()
+        if products == []:
+            scheduler.app.logger.info("No products for updating the price history.")
+            return
+        if error or not products:
+            scheduler.app.logger.info(
+                "Updating the price history aborted: cannot get products from db."
+            )
+            return
+        for product in products:
+            error, offers = db.get_product_offers(product["id"])
+            if error or not offers:
+                scheduler.app.logger.info(
+                    "Updating the price history aborted: cannot get product offers from db."
+                )
+                return
+            total_price = 0
+            total_quantity = 0
+            for offer in offers:
+                total_price += offer["price"] * offer["items_in_stock"]
+                total_quantity += offer["items_in_stock"]
+            mean_price = total_price / total_quantity
+
+            db.add_price_record(now, product["id"], mean_price)
 
 
 def init_app(app):

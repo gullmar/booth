@@ -152,13 +152,13 @@ def get_user(id=None, username=None):
     if query == {}:
         error = "Either id or username is required to retrieve a user."
         return error, user
-    
+
     try:
         user = _read("users", ["*"], query)
     except Exception as e:
         current_app.logger.error(e)
         error = constants.GENERIC_ERROR_MESSAGE
-    
+
     return error, user
 
 
@@ -173,7 +173,7 @@ def add_user(username, password):
     except Exception as e:
         current_app.logger.error(e)
         error = constants.GENERIC_ERROR_MESSAGE
-    
+
     return error
 
 
@@ -278,7 +278,15 @@ def add_offer(id, product_id, price, items_in_stock):
     error = None
 
     try:
-        _create("offers", {"id": id, "product_id": product_id, "price": price, "items_in_stock": items_in_stock})
+        _create(
+            "offers",
+            {
+                "id": id,
+                "product_id": product_id,
+                "price": price,
+                "items_in_stock": items_in_stock,
+            },
+        )
     except Exception as e:
         current_app.logger.error(e)
         error = constants.GENERIC_ERROR_MESSAGE
@@ -293,7 +301,15 @@ def update_offer(id, product_id, price, items_in_stock):
     error = None
 
     try:
-        _update("offers", {"id": id}, {"product_id": product_id, "price": price, "items_in_stock": items_in_stock})
+        _update(
+            "offers",
+            {"id": id},
+            {
+                "product_id": product_id,
+                "price": price,
+                "items_in_stock": items_in_stock,
+            },
+        )
     except Exception as e:
         current_app.logger.error(e)
         error = constants.GENERIC_ERROR_MESSAGE
@@ -306,6 +322,25 @@ def delete_offer(id):
 
     try:
         _delete("offers", {"id": id})
+    except Exception as e:
+        current_app.logger.error(e)
+        error = constants.GENERIC_ERROR_MESSAGE
+
+    return error
+
+
+def add_price_record(timestamp, product_id, mean_price):
+    error = None
+
+    try:
+        _create(
+            "price_history",
+            {
+                "timestamp": timestamp,
+                "product_id": product_id,
+                "mean_price": mean_price,
+            },
+        )
     except Exception as e:
         current_app.logger.error(e)
         error = constants.GENERIC_ERROR_MESSAGE
