@@ -1,7 +1,5 @@
 import sqlite3
-from typing import Optional
 from uuid import uuid4
-from _pytest.mark import expression
 
 import click
 from flask import current_app, g

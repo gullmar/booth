@@ -1,0 +1,20 @@
+secrets:
+  flask_secret_key:
+    environment: SECRET_KEY
+  offers_refresh_token:
+    environment: OFFERS_REFRESH_TOKEN
+
+services:
+  app:
+    image: booth
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      OFFERS_BASEURL: https://python.exercise.applifting.cz
+      OFFERS_SYNC_INTERVAL_SECONDS: 300
+      SECRET_KEY_FILE: /run/secrets/flask_secret_key
+      OFFERS_REFRESH_TOKEN_FILE: /run/secrets/offers_refresh_token
+    secrets:
+      - flask_secret_key
+      - offers_refresh_token
