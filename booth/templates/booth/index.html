@@ -1,7 +1,9 @@
-{% extends 'base.html' %} {% block header %}
+{% extends 'base.html' %}
+{% block header %}
 <h2>{% block title %}Products{% endblock %}</h2>
-{% endblock %} {% block content %}
-<a href="{{ url_for('booth.register') }}" role="button" id="register-button">
+{% endblock %}
+{% block content %}
+<a href="{{ url_for('booth.register') }}" role="button" id="register-product-button">
   Register a new product
 </a>
 <table role="grid">

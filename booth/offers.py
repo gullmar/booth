@@ -6,7 +6,7 @@ from booth import offers_api
 
 
 # FIXME: this mechanism is not easily scalable and requires a specific
-# implementation in each function calling the offers API.
+# implementation pattern in each function calling the offers API.
 # A more sophisticated solution relying on the JWT expiration could be preferred.
 def evaluate_and_renovate_token(error) -> tuple[str | None, bool]:
     """

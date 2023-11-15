@@ -142,6 +142,41 @@ def _delete(table, query: dict):
 # Model
 
 
+def get_user(id=None, username=None):
+    error, user = None, None
+    query = {}
+    if id:
+        query["id"] = id
+    if username:
+        query["username"] = username
+    if query == {}:
+        error = "Either id or username is required to retrieve a user."
+        return error, user
+    
+    try:
+        user = _read("users", ["*"], query)
+    except Exception as e:
+        current_app.logger.error(e)
+        error = constants.GENERIC_ERROR_MESSAGE
+    
+    return error, user
+
+
+def add_user(username, password):
+    error = None
+
+    try:
+        _create("users", {"username": username, "password": password})
+    except sqlite3.IntegrityError as e:
+        current_app.logger.error(e)
+        error = f'Username "{username}" is already used by another user.'
+    except Exception as e:
+        current_app.logger.error(e)
+        error = constants.GENERIC_ERROR_MESSAGE
+    
+    return error
+
+
 def register_product(name, description):
     error = None
     product_id = str(uuid4())

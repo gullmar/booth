@@ -19,7 +19,6 @@ def read_config_from_file(app, name):
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
     app.logger.setLevel("INFO")
-    app.logger.info(os.environ)
     app.config.from_mapping(
         SECRET_KEY="dev",
         DATABASE=os.path.join(app.instance_path, "db.sqlite"),
@@ -58,12 +57,12 @@ def create_app(test_config=None):
     read_config_from_file(app, "SECRET_KEY")
     read_config_from_file(app, "OFFERS_REFRESH_TOKEN")
 
-    app.logger.info(app.config)
-
-    from . import db, booth, scheduler
+    from . import db, auth, booth, scheduler
 
     db.init_app(app)
+    app.register_blueprint(auth.bp)
     app.register_blueprint(booth.bp)
     scheduler.init_app(app)
+    app.add_url_rule("/", endpoint="index")
 
     return app

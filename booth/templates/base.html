@@ -7,20 +7,36 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 <body>
   <nav>
-    <span>
+    <a href="{{ url_for('booth.index') }}">
       <h1>Booth - Applifting Python Assessment</h1>
-    </span>
+    </a>
+    <div id="session-controls">
+      {% if g.user %}
+      <span>{{ g.user['username'] }}</span>
+      <a href="{{ url_for('auth.logout') }}">Log Out</a>
+      {% else %}
+      <a href="{{ url_for('auth.register') }}">Register</a>
+      
+      <a href="{{ url_for('auth.login') }}">Log In</a>
+      {% endif %}
+      </div>
   </nav>
   <main class="container">
-    <header>{% block header %}{% endblock %}</header>
+    {% if g.user or session_control %}
+    <header>
+      {% if back_url %}
+      <a href="{{ back_url }}">⟵ back</a>
+      {% endif %}
+      {% block header %}{% endblock %}
+    </header>
     <div class="content">
       {% for message in get_flashed_messages() %}
       <mark>{{ message }}</mark>
       {% endfor %}
-      {% if not is_index %}
-      <a href="{{ url_for('booth.index') }}">⟵ back</a>
-      {% endif %}
       {% block content %}{% endblock %}
     </div>
+    {% else %}
+    <mark>Login to see content.</mark>
+    {% endif %}
   </main>
 </body>

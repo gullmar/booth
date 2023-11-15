@@ -20,7 +20,11 @@ def index():
     if error:
         flash(error)
 
-    return render_template("booth/index.html", products=products or [], is_index=True)
+    return render_template(
+        "booth/index.html",
+        products=products or [],
+        is_index=True,
+    )
 
 
 @bp.route("/register", methods=("GET", "POST"))
@@ -63,7 +67,7 @@ def register():
     if error:
         flash(error)
 
-    return render_template("booth/register.html")
+    return render_template("booth/register.html", back_url=url_for("booth.index"))
 
 
 @bp.route("/<product_id>/edit", methods=("GET", "POST"))
@@ -94,7 +98,9 @@ def edit(product_id):
     if error:
         flash(error)
 
-    return render_template("booth/edit.html", product=product)
+    return render_template(
+        "booth/edit.html", back_url=url_for("booth.index"), product=product
+    )
 
 
 @bp.route("/<product_id>/delete", methods=("GET", "POST"))
@@ -115,7 +121,9 @@ def delete(product_id):
     if product is None:
         return redirect(url_for("booth.index"))
 
-    return render_template("booth/delete.html", product=product)
+    return render_template(
+        "booth/delete.html", back_url=url_for("booth.index"), product=product
+    )
 
 
 @bp.route("/<product_id>/offers")
@@ -131,4 +139,9 @@ def offers(product_id):
     if not product or not product_offers:
         return redirect(url_for("booth.index"))
 
-    return render_template("booth/offers.html", product=product, offers=product_offers)
+    return render_template(
+        "booth/offers.html",
+        back_url=url_for("booth.index"),
+        product=product,
+        offers=product_offers,
+    )

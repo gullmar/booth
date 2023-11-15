@@ -2,6 +2,18 @@ body {
   padding: var(--spacing);
 }
 
+nav > a > h1 {
+  margin-bottom: 0;
+}
+
+#session-controls {
+  height: fit-content;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: row;
+  gap: var(--spacing);
+}
+
 .content {
   width: 100%;
   display: flex;
@@ -9,7 +21,7 @@ body {
   gap: var(--spacing);
 }
 
-#register-button {
+#register-product-button {
   align-self: flex-end;
 }
 
