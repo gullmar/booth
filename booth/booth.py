@@ -9,7 +9,7 @@ from flask import (
 from datetime import datetime
 import json
 
-from booth import db, offers as booth_offers
+from booth import auth, db, offers as booth_offers
 
 
 bp = Blueprint("booth", __name__)
@@ -30,6 +30,7 @@ def index():
 
 
 @bp.route("/register", methods=("GET", "POST"))
+@auth.login_required
 def register():
     error: str | None = None
 
@@ -73,6 +74,7 @@ def register():
 
 
 @bp.route("/<product_id>/edit", methods=("GET", "POST"))
+@auth.login_required
 def edit(product_id):
     error, product = db.get_product(product_id)
 
@@ -106,6 +108,7 @@ def edit(product_id):
 
 
 @bp.route("/<product_id>/delete", methods=("GET", "POST"))
+@auth.login_required
 def delete(product_id):
     if request.method == "POST":
         error = db.delete_product(product_id)
