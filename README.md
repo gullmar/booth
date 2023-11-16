@@ -78,3 +78,15 @@ Secret variables can be specified as environment variables when starting the con
 ```
 SECRET_KEY=... OFFERS_REFRESH_TOKEN=... docker-compose up
 ```
+
+## Environment variables
+
+- `OFFERS_BASEURL`: URL of the offers API
+- `OFFERS_SYNC_INTERVAL_SECONDS`: seconds between two synchronizations with the offers API (default: 60)
+- `UPDATE_PRICE_HISTORY_INTERVAL_SECONDS`: seconds between two updates of the price history (default: 60)
+- `MAX_PRODUCT_RECORDS`: maximum number of records in the price history - the older records will be deleted
+
+## TODO
+
+- Improve test coverage
+- Improve refresh token mechanics

@@ -145,7 +145,7 @@ def init_app(app):
             app.logger.error(
                 f"Error parsing OFFERS_SYNC_INTERVAL_SECONDS: {app.config['OFFERS_SYNC_INTERVAL_SECONDS']}, using default of 60 seconds"
             )
-            sync_interval_seconds = 300
+            sync_interval_seconds = 60
         try:
             update_history_interval_seconds = int(
                 app.config["UPDATE_PRICE_HISTORY_INTERVAL_SECONDS"]
@@ -154,7 +154,7 @@ def init_app(app):
             app.logger.error(
                 f"Error parsing UPDATE_PRICE_HISTORY_INTERVAL_SECONDS: {app.config['UPDATE_PRICE_HISTORY_INTERVAL_SECONDS']}, using default of 60 seconds"
             )
-            update_history_interval_seconds = 300
+            update_history_interval_seconds = 60
         app.config.from_mapping(
             JOBS=[
                 {

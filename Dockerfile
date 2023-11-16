@@ -8,5 +8,4 @@ RUN . .venv/bin/activate
 RUN pip install /$WHL_FILE
 RUN pip install waitress
 RUN flask --app booth init-db
-ENV OFFERS_SYNC_INTERVAL_SECONDS=300
 CMD waitress-serve --call 'booth:create_app'
