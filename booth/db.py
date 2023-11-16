@@ -1,3 +1,4 @@
+from enum import Enum
 import sqlite3
 from uuid import uuid4
 
@@ -66,7 +67,7 @@ def _read(table, project: list, query: dict):
     row = (
         get_db()
         .execute(
-            f"SELECT {', '.join(project)} FROM {table} WHERE {', '.join([f'{key} = ?' for key in keys])}",
+            f"SELECT {', '.join(project)} FROM {table} WHERE {' AND '.join([f'({key} = ?)' for key in keys])}",
             tuple(values),
         )
         .fetchone()
@@ -97,7 +98,7 @@ def _read_bulk(table, project: list, query: dict, order_by=None):
     rows = (
         get_db()
         .execute(
-            f"SELECT {', '.join(project)} FROM {table} WHERE {', '.join([f'{key} = ?' for key in keys])}"
+            f"SELECT {', '.join(project)} FROM {table} WHERE {' AND '.join([f'({key} = ?)' for key in keys])}"
             + (f" ORDER BY {order_by}" if order_by else ""),
             tuple(values),
         )
@@ -117,7 +118,7 @@ def _update(table, query: dict, updates: dict):
     update_values = list(updates.values())
     db = get_db()
     db.execute(
-        f"UPDATE {table} SET {', '.join([f'{key} = ?' for key in update_keys])} WHERE {', '.join([f'{key} = ?' for key in query_keys])}",
+        f"UPDATE {table} SET {', '.join([f'{key} = ?' for key in update_keys])} WHERE {' AND '.join([f'({key} = ?)' for key in query_keys])}",
         tuple(update_values + query_values),
     )
     db.commit()
@@ -128,11 +129,10 @@ def _update(table, query: dict, updates: dict):
 
 def _delete(table, query: dict):
     keys = query.keys()
-    print(f"DELETE FROM {table} WHERE {', '.join([f'{key} = ?' for key in keys])}")
     values = query.values()
     db = get_db()
     db.execute(
-        f"DELETE FROM {table} WHERE {', '.join([f'{key} = ?' for key in keys])}",
+        f"DELETE FROM {table} WHERE {' AND '.join([f'({key} = ?)' for key in keys])}",
         tuple(values),
     )
     db.commit()
@@ -329,7 +329,7 @@ def delete_offer(id):
     return error
 
 
-def add_price_record(timestamp, product_id, mean_price):
+def add_price_record(timestamp, product_id, mean_price, min_price):
     error = None
 
     try:
@@ -339,6 +339,45 @@ def add_price_record(timestamp, product_id, mean_price):
                 "timestamp": timestamp,
                 "product_id": product_id,
                 "mean_price": mean_price,
+                "min_price": min_price,
+            },
+        )
+    except Exception as e:
+        current_app.logger.error(e)
+        error = constants.GENERIC_ERROR_MESSAGE
+
+    return error
+
+
+def get_price_history(product_id):
+    error, price_history = None, None
+
+    try:
+        price_history = _read_bulk(
+            "price_history",
+            ["timestamp", "product_id", "mean_price", "min_price"],
+            {"product_id": product_id},
+            order_by="timestamp"
+        )
+
+        if price_history is None:
+            error = "Error retrieving product offers"
+    except Exception as e:
+        current_app.logger.error(e)
+        error = constants.GENERIC_ERROR_MESSAGE
+
+    return error, price_history
+
+
+def delete_oldest_price_record(product_id):
+    error = None
+
+    try:
+        _delete(
+            "price_history",
+            {
+                "prodcut_id": product_id,
+                "timestamp": f"( SELECT MIN timestamp FROM price_history )",
             },
         )
     except Exception as e:

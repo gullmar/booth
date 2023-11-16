@@ -96,9 +96,14 @@ def update_price_history(local_scheduler: APScheduler | None = None):
         if products == []:
             scheduler.app.logger.info("No products for updating the price history.")
             return
-        if error or not products:
+        if error or products is None:
             scheduler.app.logger.info(
                 "Updating the price history aborted: cannot get products from db."
+            )
+            return
+        if not products:
+            scheduler.app.logger.info(
+                "Updating the price history interrupted: there are no products."
             )
             return
         for product in products:
@@ -107,37 +112,67 @@ def update_price_history(local_scheduler: APScheduler | None = None):
                 scheduler.app.logger.info(
                     "Updating the price history aborted: cannot get product offers from db."
                 )
-                return
+                continue
+            min_price = offers[0]["price"]
             total_price = 0
             total_quantity = 0
             for offer in offers:
                 total_price += offer["price"] * offer["items_in_stock"]
                 total_quantity += offer["items_in_stock"]
+                if offer["price"] < min_price:
+                    min_price = offer["price"]
             mean_price = total_price / total_quantity
 
-            db.add_price_record(now, product["id"], mean_price)
+            db.add_price_record(now, product["id"], mean_price, min_price)
+
+            # Allow a maximum number of records per product
+            try:
+                max_product_records = int(scheduler.app.config["MAX_PRODUCT_RECORDS"])
+            except Exception:
+                scheduler.app.logger.error(
+                    f"Error parsing MAX_PRODUCT_RECORDS: {scheduler.app.config['MAX_PRODUCT_RECORDS']}, using default of 100"
+                )
+                max_product_records = 100
+            if len(offers) + 1 > max_product_records:
+                db.delete_oldest_price_record(product["id"])
 
 
 def init_app(app):
     if not app.config["TESTING"]:
         try:
-            interval_seconds = int(app.config["OFFERS_SYNC_INTERVAL_SECONDS"])
+            sync_interval_seconds = int(app.config["OFFERS_SYNC_INTERVAL_SECONDS"])
         except Exception:
             app.logger.error(
                 f"Error parsing OFFERS_SYNC_INTERVAL_SECONDS: {app.config['OFFERS_SYNC_INTERVAL_SECONDS']}, using default of 60 seconds"
             )
-            interval_seconds = 60
+            sync_interval_seconds = 300
+        try:
+            update_history_interval_seconds = int(
+                app.config["UPDATE_PRICE_HISTORY_INTERVAL_SECONDS"]
+            )
+        except Exception:
+            app.logger.error(
+                f"Error parsing UPDATE_PRICE_HISTORY_INTERVAL_SECONDS: {app.config['UPDATE_PRICE_HISTORY_INTERVAL_SECONDS']}, using default of 60 seconds"
+            )
+            update_history_interval_seconds = 300
         app.config.from_mapping(
             JOBS=[
                 {
                     "id": "sync_offers",
                     "func": sync_offers,
                     "trigger": "interval",
-                    "seconds": interval_seconds,
-                }
+                    "seconds": sync_interval_seconds,
+                },
+                {
+                    "id": "update_price_history",
+                    "func": update_price_history,
+                    "trigger": "interval",
+                    "seconds": update_history_interval_seconds,
+                },
             ]
         )
 
         app_scheduler.init_app(app)
         app_scheduler.start()
         app_scheduler.run_job("sync_offers")
+        app_scheduler.run_job("update_price_history")

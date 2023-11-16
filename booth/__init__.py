@@ -26,6 +26,8 @@ def create_app(test_config=None):
         OFFERS_REFRESH_TOKEN="",
         OFFERS_ACCESS_TOKEN="",
         OFFERS_SYNC_INTERVAL_SECONDS="60",
+        UPDATE_PRICE_HISTORY_INTERVAL_SECONDS="60",
+        MAX_PRODUCT_RECORDS="100",
         SECRET_KEY_FILE="",
         OFFERS_REFRESH_TOKEN_FILE="",
     )
@@ -43,6 +45,8 @@ def create_app(test_config=None):
         read_config_from_env(app, "OFFERS_REFRESH_TOKEN")
         read_config_from_env(app, "OFFERS_ACCESS_TOKEN")
         read_config_from_env(app, "OFFERS_SYNC_INTERVAL_SECONDS")
+        read_config_from_env(app, "UPDATE_PRICE_HISTORY_INTERVAL_SECONDS")
+        read_config_from_env(app, "MAX_PRODUCT_RECORDS")
         read_config_from_env(app, "SECRET_KEY_FILE")
         read_config_from_env(app, "OFFERS_REFRESH_TOKEN_FILE")
     else:

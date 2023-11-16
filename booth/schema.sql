@@ -28,5 +28,6 @@ CREATE TABLE price_history (
 	timestamp INTEGER NOT NULL,
 	product_id TEXT NOT NULL,
 	mean_price INTEGER NOT NULL,
+	min_price INTEGER NOT NULL,
 	FOREIGN KEY (product_id) REFERENCES products (id)
 )

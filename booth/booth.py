@@ -6,6 +6,8 @@ from flask import (
     request,
     url_for,
 )
+from datetime import datetime
+import json
 
 from booth import db, offers as booth_offers
 
@@ -136,7 +138,7 @@ def offers(product_id):
 
     if error:
         flash(error)
-    if not product or not product_offers:
+    if not product or product_offers is None:
         return redirect(url_for("booth.index"))
 
     return render_template(
@@ -144,4 +146,42 @@ def offers(product_id):
         back_url=url_for("booth.index"),
         product=product,
         offers=product_offers,
+    )
+
+
+@bp.route("/<product_id>/history")
+def history(product_id):
+    error, product = db.get_product(product_id)
+
+    price_history = None
+    if not error:
+        error, price_history = db.get_price_history(product_id)
+
+    if error:
+        flash(error)
+    if not product or price_history is None:
+        return redirect(url_for("booth.index"))
+
+    # Generate chart stringified data
+    labels = [
+        datetime.fromtimestamp(record["timestamp"]).strftime("%x %X")
+        for record in price_history
+    ]
+    datasets = [
+        {
+            "label": "Mean price",
+            "data": [record["mean_price"] for record in price_history],
+        },
+        {
+            "label": "Minimum price",
+            "data": [record["min_price"] for record in price_history],
+        },
+    ]
+
+    return render_template(
+        "booth/history.html",
+        back_url=url_for("booth.offers", product_id=product_id),
+        product=product,
+        labels=json.dumps(labels),
+        datasets=json.dumps(datasets)
     )

@@ -13,6 +13,8 @@ services:
     environment:
       OFFERS_BASEURL: https://python.exercise.applifting.cz
       OFFERS_SYNC_INTERVAL_SECONDS: 300
+      UPDATE_PRICE_HISTORY_INTERVAL_SECONDS: 300
+      MAX_PRODUCT_RECORDS: 100
       SECRET_KEY_FILE: /run/secrets/flask_secret_key
       OFFERS_REFRESH_TOKEN_FILE: /run/secrets/offers_refresh_token
     secrets:

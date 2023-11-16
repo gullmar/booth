@@ -1,6 +1,7 @@
 {% extends 'base.html' %} {% block header %}
 <h2>{% block title %}Offers for product: {{ product['name'] }}{% endblock %}</h2>
 {% endblock %} {% block content %}
+<a href="{{ url_for('booth.history', product_id=product['id']) }}">Go to price history</a>
 <table role="grid">
   <thead>
     <tr>

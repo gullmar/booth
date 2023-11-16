@@ -1,0 +1,27 @@
+{% extends 'base.html' %} {% block header %}
+<h2>{% block title %}Price history for product: {{ product['name'] }}{% endblock %}</h2>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %} {% block content %}
+<div>
+  <canvas id="history-chart"></canvas>
+</div>
+<script>
+	function decodeEntity(inputStr) {
+		var textarea = document.createElement('textarea');
+		textarea.innerHTML = inputStr;
+		return textarea.value;
+	}
+
+  const ctx = document.getElementById('history-chart');
+	const labels = JSON.parse(decodeEntity("{{ labels }}"))
+	const datasets = JSON.parse(decodeEntity("{{ datasets }}"))
+
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets
+    }
+  });
+</script>
+{% endblock %}
